@@ -257,9 +257,12 @@ app.get('/api/articles', async (req, res) => {
         const blogUrl = `${BLOG_SERVICE_URL}/api/articles`;
 
         // 转发请求到blog服务（公开接口，无需Token）
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         const response = await fetch(blogUrl, {
-            timeout: 10000
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
             const errorText = await response.text();

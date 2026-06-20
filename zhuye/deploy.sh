@@ -24,7 +24,7 @@ fi
 
 # 1. 创建静态文件目录
 echo "📁 创建静态文件目录..."
-$SUDO mkdir -p /var/www/static
+$SUDO mkdir -p /var/www/zhuye/static
 
 # 2. 复制静态文件
 echo "📋 复制静态文件..."
@@ -32,12 +32,12 @@ if [ ! -d "$STATIC_SOURCE" ]; then
     echo "❌ 错误: 找不到 static 目录"
     exit 1
 fi
-$SUDO cp -r $STATIC_SOURCE/* /var/www/static/
+$SUDO cp -r $STATIC_SOURCE/* /var/www/zhuye/static/
 
 # 3. 设置权限
 echo "🔒 设置文件权限..."
-$SUDO chown -R www-data:www-data /var/www/static 2>/dev/null || $SUDO chown -R nginx:nginx /var/www/static 2>/dev/null
-$SUDO chmod -R 644 /var/www/static
+$SUDO chown -R www-data:www-data /var/www/zhuye/static 2>/dev/null || $SUDO chown -R nginx:nginx /var/www/zhuye/static 2>/dev/null
+$SUDO chmod -R 644 /var/www/zhuye/static
 
 # 4. 检测nginx配置目录
 NGINX_CONF_DIR=""
@@ -96,7 +96,7 @@ echo "✅ 部署完成！"
 echo "========================================"
 echo ""
 echo "📁 目录结构:"
-echo "   /var/www/static          # 静态文件"
+echo "   /var/www/zhuye/static      # 静态文件"
 echo "   $API_SOURCE             # API 服务器"
 echo ""
 echo "🌐 访问地址: http://localhost"
