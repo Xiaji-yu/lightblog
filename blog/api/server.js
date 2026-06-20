@@ -7,9 +7,16 @@ const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const createDOMPurify = require('dompurify');
 const { JSDOM } = require('jsdom');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// 常量
+const BCRYPT_SALT_ROUNDS = 10;
+const TITLE_MAX_LENGTH = 200;
+const CONTENT_MAX_LENGTH = 500000;
+const EXCERPT_LENGTH = 150;
 
 // 初始化 DOMPurify（用于服务端 HTML 清洗）
 const window = new JSDOM('').window;
@@ -30,16 +37,27 @@ const LOG_DIR = path.join(DATA_DIR, 'logs');
 const DISABLE_STATIC = process.env.DISABLE_STATIC === 'true'; // 设置为true时禁用静态文件服务（用于Nginx反向代理场景）
 
 // 初始化 Session 中间件
+const sessionSecret = (() => {
+    if (process.env.SESSION_SECRET) {
+        return process.env.SESSION_SECRET;
+    }
+    const generated = crypto.randomBytes(32).toString('hex');
+    if (process.env.NODE_ENV === 'production') {
+        console.error('致命错误: SESSION_SECRET 环境变量未设置，生产环境必须配置');
+        process.exit(1);
+    }
+    console.warn('⚠️  SESSION_SECRET 未设置，已生成随机密钥（重启后所有用户需重新登录）');
+    return generated;
+})();
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || (() => {
-        const generated = crypto.randomBytes(32).toString('hex');
-        console.warn('⚠️  SESSION_SECRET 未设置，已生成随机密钥（重启后所有用户需重新登录）');
-        return generated;
-    })(),
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // 生产环境自动启用 HTTPS-only
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'strict',
         maxAge: 24 * 60 * 60 * 1000 // 24小时
     }
 }));
@@ -48,17 +66,17 @@ app.use(session({
 const DEFAULT_USERS = {
     'admin': {
         username: 'admin',
-        password: null, // 将从环境变量 ADMIN_PASSWORD 读取，或生成随机密码
+        password: null,
         role: 'admin',
         displayName: '管理员',
-        apiToken: null  // API令牌，首次登录时生成
+        apiTokenHash: null
     },
     'superadmin': {
         username: 'superadmin',
-        password: null, // 将从环境变量 SUPERADMIN_PASSWORD 读取
+        password: null,
         role: 'superadmin',
         displayName: '超级管理员',
-        apiToken: null
+        apiTokenHash: null
     }
 };
 
@@ -79,7 +97,7 @@ async function loadUsers() {
         for (const [username, user] of Object.entries(users)) {
             if (user.password && !user.password.startsWith('$2')) {
                 // 密码不是 bcrypt 哈希，自动升级
-                user.password = await bcrypt.hash(user.password, 10);
+                user.password = await bcrypt.hash(user.password, BCRYPT_SALT_ROUNDS);
                 migrated = true;
             }
         }
@@ -100,8 +118,8 @@ async function loadUsers() {
         const adminPassword = process.env.ADMIN_PASSWORD || secureRandomHex(8);
         const superadminPassword = process.env.SUPERADMIN_PASSWORD || secureRandomHex(8);
 
-        users.admin.password = await bcrypt.hash(adminPassword, 10);
-        users.superadmin.password = await bcrypt.hash(superadminPassword, 10);
+        users.admin.password = await bcrypt.hash(adminPassword, BCRYPT_SALT_ROUNDS);
+        users.superadmin.password = await bcrypt.hash(superadminPassword, BCRYPT_SALT_ROUNDS);
 
         await saveUsers();
         console.log('已创建默认用户数据');
@@ -131,13 +149,19 @@ async function verifyPassword(plainPassword, storedPassword) {
 
 // 生成API Token
 function generateApiToken() {
-    return 'blog_' + Date.now().toString(36) + '_' + secureRandomHex(16);
+    return 'blog_' + Date.now().toString(36) + '_' + secureRandomHex(32);
+}
+
+// 哈希API Token（SHA-256，仅存储哈希值）
+function hashToken(token) {
+    return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 // Token认证中间件（用于API）
 function requireTokenAuth(req, res, next) {
     // 首先检查是否已登录（Session认证）
     if (req.session && req.session.user) {
+        req.user = req.session.user; // 统一通过 req.user 获取用户信息
         return next();
     }
 
@@ -147,13 +171,14 @@ function requireTokenAuth(req, res, next) {
         return res.status(401).json({ error: '未授权，请提供有效的Token' });
     }
 
-    const token = authHeader.substring(7); // 移除 "Bearer " 前缀
+    const token = authHeader.slice('Bearer '.length).trim();
     if (!token) {
         return res.status(401).json({ error: 'Token不能为空' });
     }
 
-    // 验证Token
-    const user = Object.values(users).find(u => u.apiToken === token);
+    // 验证Token（比较哈希值）
+    const tokenHash = hashToken(token);
+    const user = Object.values(users).find(u => u.apiTokenHash === tokenHash);
     if (!user) {
         return res.status(401).json({ error: '无效的Token' });
     }
@@ -209,7 +234,7 @@ async function saveIdMap() {
 
 // 解析 Front Matter（支持多行列表格式）
 function parseFrontMatter(content) {
-    const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n/);
+    const frontMatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
     let meta = {};
     let body = content;
 
@@ -262,7 +287,7 @@ function parseFrontMatter(content) {
 
 // 生成随机ID
 function generateId() {
-    return 'art_' + Date.now().toString(36) + '_' + secureRandomHex(8);
+    return 'art_' + secureRandomHex(16);
 }
 function getFilenameById(id) {
     return articleIdMap[id];
@@ -283,10 +308,39 @@ async function removeIdMapping(id) {
 // 中间件
 app.use(express.json());
 
-// 静态文件服务（Windows/简单部署场景）
-// 注意：Linux生产环境通常由Nginx提供静态文件，请设置环境变量 DISABLE_STATIC=true
+// 通用 API 频率限制
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15分钟
+    max: 100, // 100次请求
+    message: { error: '请求过于频繁，请稍后再试' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// 登录接口专用频率限制（防暴力破解）
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15分钟
+    max: 10, // 10次尝试
+    message: { error: '登录尝试次数过多，请15分钟后再试' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// 对所有 API 路由应用通用频率限制
+app.use('/api', apiLimiter);
+
+// 屏蔽敏感数据目录的访问（在静态文件服务之前）
+app.use((req, res, next) => {
+    if (req.path.startsWith('/app-data') || req.path.endsWith('.json') || req.path === '/server.js' || req.path === '/package.json') {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+    next();
+});
+
+// 静态文件服务（仅服务 static/ 目录，而非整个 api 目录）
 if (!DISABLE_STATIC) {
-    app.use(express.static(__dirname));
+    const staticDir = path.join(__dirname, '..', 'static');
+    app.use(express.static(staticDir));
     console.log('📁 静态文件服务已启用（由Express提供）');
 } else {
     console.log('⚡ 静态文件服务已禁用（由Nginx提供）');
@@ -295,7 +349,7 @@ if (!DISABLE_STATIC) {
 // ============ 认证相关 API ============
 
 // 登录接口
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -322,17 +376,24 @@ app.post('/api/login', async (req, res) => {
         };
 
         // 如果用户还没有API Token，自动生成一个
-        if (!user.apiToken) {
-            user.apiToken = generateApiToken();
+        if (!user.apiTokenHash) {
+            const newToken = generateApiToken();
+            user.apiTokenHash = hashToken(newToken);
             await saveUsers();
+            res.json({
+                success: true,
+                message: '登录成功',
+                user: req.session.user,
+                apiToken: newToken
+            });
+        } else {
+            res.json({
+                success: true,
+                message: '登录成功',
+                user: req.session.user,
+                apiToken: null  // 已存在token，不重复展示
+            });
         }
-
-        res.json({
-            success: true,
-            message: '登录成功',
-            user: req.session.user,
-            apiToken: user.apiToken  // 返回API Token
-        });
     } catch (error) {
         console.error('登录失败:', error);
         res.status(500).json({ error: '登录失败' });
@@ -368,8 +429,7 @@ app.get('/api/session', (req, res) => {
 app.post('/api/change-password', requireTokenAuth, async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        // 支持Token认证时，从req.user获取用户名；从Session认证时从req.session获取
-        const username = req.user ? req.user.username : req.session.user.username;
+        const username = req.user.username;
 
         if (!currentPassword || !newPassword) {
             return res.status(400).json({ error: '当前密码和新密码不能为空' });
@@ -389,13 +449,20 @@ app.post('/api/change-password', requireTokenAuth, async (req, res) => {
             return res.status(401).json({ error: '当前密码错误' });
         }
 
-        // 更新密码（使用 bcrypt 哈希）
-        users[username].password = await bcrypt.hash(newPassword, 10);
+        // 更新密码
+        users[username].password = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
         await saveUsers();
+
+        // 销毁当前Session，强制重新登录
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('销毁Session失败:', err);
+            }
+        });
 
         res.json({
             success: true,
-            message: '密码修改成功'
+            message: '密码修改成功，请重新登录'
         });
     } catch (error) {
         console.error('修改密码失败:', error);
@@ -405,9 +472,9 @@ app.post('/api/change-password', requireTokenAuth, async (req, res) => {
 
 // ============ Token 管理 API ============
 
-// 获取当前用户的API Token
+// 获取当前用户的API Token状态
 app.get('/api/token', requireTokenAuth, (req, res) => {
-    const username = req.user ? req.user.username : req.session.user.username;
+    const username = req.user.username;
     const user = users[username];
 
     if (!user) {
@@ -418,28 +485,28 @@ app.get('/api/token', requireTokenAuth, (req, res) => {
         username: user.username,
         role: user.role,
         displayName: user.displayName,
-        apiToken: user.apiToken || null
+        hasToken: !!user.apiTokenHash
     });
 });
 
 // 重置/生成API Token
 app.post('/api/token/reset', requireTokenAuth, async (req, res) => {
     try {
-        const username = req.user ? req.user.username : req.session.user.username;
+        const username = req.user.username;
         const user = users[username];
 
         if (!user) {
             return res.status(404).json({ error: '用户不存在' });
         }
 
-        // 生成新Token
+        // 生成新Token，仅返回原始Token一次
         const newToken = generateApiToken();
-        user.apiToken = newToken;
+        user.apiTokenHash = hashToken(newToken);
         await saveUsers();
 
         res.json({
             success: true,
-            message: 'Token已重置',
+            message: 'Token已重置，请妥善保存',
             apiToken: newToken
         });
     } catch (error) {
@@ -451,14 +518,14 @@ app.post('/api/token/reset', requireTokenAuth, async (req, res) => {
 // 删除API Token（禁用API访问）
 app.delete('/api/token', requireTokenAuth, async (req, res) => {
     try {
-        const username = req.user ? req.user.username : req.session.user.username;
+        const username = req.user.username;
         const user = users[username];
 
         if (!user) {
             return res.status(404).json({ error: '用户不存在' });
         }
 
-        user.apiToken = null;
+        user.apiTokenHash = null;
         await saveUsers();
 
         res.json({
@@ -475,53 +542,51 @@ app.delete('/api/token', requireTokenAuth, async (req, res) => {
 
 // 辅助函数：读取所有Markdown文件
 async function getAllArticles() {
-    try {
-        const files = await fs.readdir(MD_DIR);
-        const mdFiles = files.filter(file => file.endsWith('.md'));
+    const files = await fs.readdir(MD_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md'));
 
-        const articles = await Promise.all(
-            mdFiles.map(async (file) => {
-                const filePath = path.join(MD_DIR, file);
-                const content = await fs.readFile(filePath, 'utf-8');
+    const articles = await Promise.all(
+        mdFiles.map(async (file) => {
+            const filePath = path.join(MD_DIR, file);
+            const content = await fs.readFile(filePath, 'utf-8');
 
-                const { meta, body } = parseFrontMatter(content);
+            const { meta, body } = parseFrontMatter(content);
 
-                // 查找对应的ID（从映射中）
-                const id = Object.keys(articleIdMap).find(key => articleIdMap[key] === file) || file.replace('.md', '');
+            const id = Object.keys(articleIdMap).find(key => articleIdMap[key] === file) || file.replace('.md', '');
 
-                return {
-                    id: id,
-                    filename: file,
-                    meta: meta,
-                    content: body,
-                    excerpt: meta.excerpt || body.substring(0, 150) + '...'
-                };
-            })
-        );
+            return {
+                id: id,
+                filename: file,
+                meta: meta,
+                content: body,
+                excerpt: meta.excerpt || body.substring(0, EXCERPT_LENGTH) + '...'
+            };
+        })
+    );
 
-        // 按日期排序
-        articles.sort((a, b) => new Date(b.meta.date) - new Date(a.meta.date));
+    articles.sort((a, b) => new Date(b.meta.date) - new Date(a.meta.date));
 
-        return articles;
-    } catch (error) {
-        console.error('读取文章失败:', error);
-        return [];
-    }
+    return articles;
 }
 
 // 获取所有文章列表（仅元数据）- 公开接口（无需认证）
 app.get('/api/public/articles', async (req, res) => {
-    const articles = await getAllArticles();
-    const list = articles.slice(0, 5).map(article => ({
-        id: article.id,
-        filename: article.filename,
-        title: article.meta.title,
-        date: article.meta.date,
-        category: article.meta.category,
-        cover: article.meta.cover,
-        excerpt: article.excerpt
-    }));
-    res.json(list);
+    try {
+        const articles = await getAllArticles();
+        const list = articles.slice(0, 5).map(article => ({
+            id: article.id,
+            filename: article.filename,
+            title: article.meta.title,
+            date: article.meta.date,
+            category: article.meta.category,
+            cover: article.meta.cover,
+            excerpt: article.excerpt
+        }));
+        res.json(list);
+    } catch (error) {
+        console.error('获取公开文章列表失败:', error);
+        res.status(500).json({ error: '获取文章列表失败' });
+    }
 });
 
 // 获取所有文章列表（仅元数据）- 公开访问
@@ -564,7 +629,7 @@ app.get('/api/articles/:id', async (req, res) => {
             filename: filename,
             meta: meta,
             content: body,
-            excerpt: meta.excerpt || body.substring(0, 150) + '...'
+            excerpt: meta.excerpt || body.substring(0, EXCERPT_LENGTH) + '...'
         };
 
         // 支持返回HTML或Markdown
@@ -582,7 +647,10 @@ app.get('/api/articles/:id', async (req, res) => {
         }
     } catch (error) {
         console.error('读取文章失败:', error);
-        res.status(404).json({ error: '文章不存在' });
+        if (error.code === 'ENOENT') {
+            return res.status(404).json({ error: '文章不存在' });
+        }
+        return res.status(500).json({ error: '获取文章失败' });
     }
 });
 
@@ -595,11 +663,11 @@ app.post('/api/articles', requireTokenAuth, async (req, res) => {
             return res.status(400).json({ error: '标题和内容不能为空' });
         }
 
-        if (title.length > 200) {
+        if (title.length > TITLE_MAX_LENGTH) {
             return res.status(400).json({ error: '标题不能超过200个字符' });
         }
 
-        if (content.length > 500000) {
+        if (content.length > CONTENT_MAX_LENGTH) {
             return res.status(400).json({ error: '内容不能超过500000个字符' });
         }
 
@@ -611,15 +679,21 @@ app.post('/api/articles', requireTokenAuth, async (req, res) => {
         const slug = title.toLowerCase()
             .replace(/[^\w\u4e00-\u9fa5\s]/g, '')
             .replace(/\s+/g, '-');
-        const filename = `${slug}-${timestamp}.md`;
+        const filename = `${slug}-${timestamp}-${secureRandomHex(4)}.md`;
+
+        // 转义YAML值（防止注入）
+        function escapeYamlValue(val) {
+            if (!val) return '';
+            return val.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
+        }
 
         // 构建Front Matter
         const frontMatter = `---
-title: ${title}
+title: "${escapeYamlValue(title)}" 
 date: ${date || new Date().toISOString().split('T')[0]}
-category: ${category || '未分类'}
-cover: ${cover || ''}
-excerpt: ${excerpt || ''}
+category: "${escapeYamlValue(category || '未分类')}"
+cover: "${escapeYamlValue(cover || '')}"
+excerpt: "${escapeYamlValue(excerpt || '')}" 
 ---
 
 `;
@@ -656,11 +730,11 @@ app.put('/api/articles/:id', requireTokenAuth, async (req, res) => {
             return res.status(400).json({ error: '标题和内容不能为空' });
         }
 
-        if (title.length > 200) {
+        if (title.length > TITLE_MAX_LENGTH) {
             return res.status(400).json({ error: '标题不能超过200个字符' });
         }
 
-        if (content.length > 500000) {
+        if (content.length > CONTENT_MAX_LENGTH) {
             return res.status(400).json({ error: '内容不能超过500000个字符' });
         }
 
@@ -683,11 +757,11 @@ app.put('/api/articles/:id', requireTokenAuth, async (req, res) => {
 
         // 构建新的Front Matter
         const frontMatter = `---
-title: ${title}
+title: "${escapeYamlValue(title)}" 
 date: ${date || existingMeta.date || new Date().toISOString().split('T')[0]}
-category: ${category || existingMeta.category || '未分类'}
-cover: ${cover || existingMeta.cover || ''}
-excerpt: ${excerpt || existingMeta.excerpt || ''}
+category: "${escapeYamlValue(category || existingMeta.category || '未分类')}"
+cover: "${escapeYamlValue(cover || existingMeta.cover || '')}"
+excerpt: "${escapeYamlValue(excerpt || existingMeta.excerpt || '')}" 
 ---
 
 `;
@@ -780,12 +854,17 @@ app.listen(PORT, async () => {
     console.log(`API接口:`);
     console.log(`  GET    /api/articles          - 获取文章列表（公开）`);
     console.log(`  GET    /api/articles/:id      - 获取单篇文章（公开）`);
+    console.log(`  GET    /api/public/articles   - 获取公开文章列表（首页用）`);
     console.log(`  POST   /api/articles          - 创建文章（需Token）`);
     console.log(`  PUT    /api/articles/:id      - 更新文章（需Token）`);
     console.log(`  DELETE /api/articles/:id      - 删除文章（需Token）`);
     console.log(`  POST   /api/login             - 用户登录`);
     console.log(`  POST   /api/logout            - 用户登出`);
     console.log(`  GET    /api/session           - 获取当前会话信息`);
+    console.log(`  POST   /api/change-password   - 修改密码（需Token）`);
+    console.log(`  GET    /api/token             - 获取API Token状态`);
+    console.log(`  POST   /api/token/reset       - 重置API Token`);
+    console.log(`  DELETE /api/token             - 删除API Token`);
     console.log(`\n主页: http://localhost:${PORT}/index.html`);
     console.log(`后台: http://localhost:${PORT}/admin.html`);
     console.log(`登录: http://localhost:${PORT}/login.html`);

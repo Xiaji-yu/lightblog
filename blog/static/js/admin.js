@@ -462,7 +462,7 @@ function setupEventListeners() {
     });
 
     // Markdown 导入功能
-    parseMarkdownBtn.addEventListener('click', parseMarkdown);
+    parseMarkdownBtn.addEventListener('click', () => parseMarkdown());
     clearMarkdownBtn.addEventListener('click', () => {
         mdPaste.value = '';
         fileName.textContent = '';
@@ -804,26 +804,17 @@ function parseMarkdown(filename = null) {
         const frontMatter = frontMatterMatch[1];
         const body = markdown.replace(frontMatterMatch[0], '');
 
-        console.log('Front Matter 内容:', JSON.stringify(frontMatter)); // 调试：查看完整内容
-
         // 解析 Front Matter 字段（支持多行列表格式）
         const meta = {};
         const lines = frontMatter.split('\n');
         let currentKey = null;
         let currentList = [];
 
-        console.log('Front Matter lines:', lines); // 调试：查看所有行
-
         lines.forEach((line, index) => {
-            // 检测新字段的开始（允许value为空）
             const match = line.match(/^([^:]+):\s*(.*)$/);
             if (match) {
-                console.log(`Line ${index}: 匹配到字段 - key="${match[1].trim()}", value="${match[2].trim()}"`); // 调试
-
-                // 保存上一个字段的列表（如果有）
                 if (currentKey && currentList.length > 0) {
                     meta[currentKey] = currentList.join(', ');
-                    console.log(`保存列表字段 ${currentKey}:`, meta[currentKey]); // 调试
                     currentList = [];
                 }
 
@@ -831,26 +822,14 @@ function parseMarkdown(filename = null) {
                 let value = match[2].trim();
                 value = value.replace(/^["']|["']$/g, '');
 
-                // 如果值以 "- " 开头，说明是列表的开始
                 if (value.startsWith('- ')) {
-                    console.log(`  -> 列表开始: ${value.substring(2)}`); // 调试
                     currentList.push(value.substring(2));
                 } else if (value) {
-                    // 普通字段，直接赋值
                     meta[currentKey] = value;
-                    console.log(`  -> 普通值: ${value}`); // 调试
-                } else {
-                    // value为空，等待列表项
-                    console.log(`  -> 空值，等待列表项`); // 调试
                 }
             } else if (currentKey && line.trim().startsWith('- ')) {
-                // 处理多行列表的后续项
                 const listItem = line.trim().substring(2);
-                console.log(`Line ${index}: 列表项 - ${listItem}`); // 调试
                 currentList.push(listItem);
-            } else if (currentKey && line.trim() === '') {
-                // 空行，忽略
-                console.log(`Line ${index}: 空行，忽略`); // 调试
             }
         });
 
@@ -858,15 +837,8 @@ function parseMarkdown(filename = null) {
         if (currentKey) {
             if (currentList.length > 0) {
                 meta[currentKey] = currentList.join(', ');
-                console.log(`保存最后一个列表字段 ${currentKey}:`, meta[currentKey]); // 调试
-            } else if (!meta[currentKey]) {
-                // 如果还没有设置过这个key，且没有列表，可以设置空值或不设置
-                // 这里不设置空值，避免不必要的覆盖
             }
         }
-
-        // 调试：输出解析到的meta对象
-        console.log('最终解析的Front Matter:', meta);
 
         // 填充表单
         // 标题：如果有文件名则使用文件名（去掉.md和短横线），否则使用meta.title
@@ -966,12 +938,14 @@ function readFileAsText(file) {
         reader.readAsText(file, 'UTF-8');
     });
 }
+let toastTimer;
 function showToast(message, type = 'info') {
     toastMessage.textContent = message;
     toast.className = 'toast ' + type;
     toast.classList.add('show');
 
-    setTimeout(() => {
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
 }
@@ -986,6 +960,7 @@ function escapeHtml(text) {
 function formatDate(dateString) {
     if (!dateString) return '-';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
     return date.toLocaleDateString('zh-CN', {
         year: 'numeric',
         month: 'long',
