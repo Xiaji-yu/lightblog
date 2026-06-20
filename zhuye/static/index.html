@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夏祭的窝</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="1212.png">
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <!-- 时钟区域 -->
+        <div class="clock-section">
+            <div class="clock-time" id="clock-time">00:00:00</div>
+            <div class="clock-date" id="clock-date">2026年03月26日 星期三</div>
+            <div class="clock-holiday" id="clock-holiday">加载中...</div>
+        </div>
+
+        <!-- 天气模块 -->
+        <div class="weather-section">
+            <div class="weather-header">
+                <span class="weather-title">🌤️ 天气</span>
+                <span class="weather-location" id="weather-location">定位中...</span>
+            </div>
+            <div class="weather-main">
+                <div class="weather-icon" id="weather-icon">☀️</div>
+                <div class="weather-temp" id="weather-temp">--°C</div>
+            </div>
+            <div class="weather-desc" id="weather-desc">加载中...</div>
+        </div>
+
+        <!-- 简略日历 -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <button id="prev-month">&lt;</button>
+                <span id="current-month">2026年3月</span>
+                <button id="next-month">&gt;</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+            </div>
+            <div class="calendar-days" id="calendar-days">
+                <!-- 日期将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 服务器状态区域 -->
+        <div class="server-status-section">
+            <h3>服务器状态</h3>
+            <div class="server-list" id="server-list">
+                <!-- 服务器状态将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <div class="profile-box">
+            <div class="profile-content">
+                <div class="profile-avatar">
+                    <img src="1212.png" alt="头像" id="avatar">
+                </div>
+                <div class="profile-info">
+                    <h2>夏祭/Xiaji-yu</h2>
+                    <p class="profile-title">真理会过时，构石永恒</p>
+                    <p class="profile-description">
+                        你好！我是一名热爱写构石代码的小白。在这里，我分享我的想法、项目和日常生活。
+                        我相信构石代码可以改变世界，沙雕创意可以点亮生活。愿你在这里找到共鸣与启发！
+                    </p>
+                    
+                    <div class="profile-links">
+                        <a href="https://github.com/Xiaji-yu" target="_blank" class="social-link">GitHub</a>
+                        <a href="https://blog.xiaji.xin" target="_blank" class="social-link">博客</a>
+                        <a href="mailto:variant305@gmail.com" class="social-link">邮箱</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 博客文章列表 -->
+        <div class="blog-box">
+            <div class="blog-header">
+                <h2>📝 最新文章</h2>
+                <a href="https://blog.xiaji.xin" target="_blank" class="blog-more">查看更多 →</a>
+            </div>
+            <div class="blog-list" id="blog-list">
+                <div class="blog-loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 语录模块 -->
+        <div class="quote-box">
+            <div class="quote-content">
+                <p class="quote-text" id="quote-text">加载中...</p>
+                <p class="quote-author" id="quote-author"></p>
+            </div>
+            <button class="quote-refresh" id="quote-refresh" title="换一句">🔄</button>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p class="footer-text">
+                    <a href="https://beian.mps.gov.cn/#/query/webSearch?code=31011202022181" target="_blank" class="footer-link">
+                        <img src="备案图标.png" alt="公网安备" class="footer-icon">
+                        沪公网安备31011202022181号
+                    </a>
+                    |
+                    <a href="https://beian.miit.gov.cn/" target="_blank" class="footer-link">
+                        沪ICP备2026007186号
+                    </a>
+                </p>
+            </div>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

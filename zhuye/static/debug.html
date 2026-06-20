@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog-Box 调试工具</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #667eea; }
+        h2 { color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .test-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-btn:hover { background: #5568d3; }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .success { border-color: #2ed573; background: #d4edda; }
+        .error { border-color: #ff4757; background: #f8d7da; }
+        .warning { border-color: #ffa502; background: #fff3cd; }
+        .step { margin: 10px 0; padding: 10px; background: #e8f4fd; border-left: 4px solid #667eea; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Blog-Box 调试工具</h1>
+
+    <div class="card">
+        <h2>📋 问题诊断步骤</h2>
+
+        <div class="step">
+            <strong>步骤1:</strong> 按 Ctrl+F5 强制刷新页面 (清除浏览器缓存)
+            <br><small>这是最常见的问题！浏览器可能缓存了旧版本的script.js</small>
+        </div>
+
+        <div class="step">
+            <strong>步骤2:</strong> 打开浏览器开发者工具 (F12)
+            <br>查看 Console (控制台) 和 Network (网络) 标签页
+            <br>查看是否有红色错误信息
+        </div>
+
+        <div class="step">
+            <strong>步骤3:</strong> 点击下面的测试按钮，检查各个API是否正常
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🧪 API测试</h2>
+
+        <button class="test-btn" onclick="testBlogAPI()">测试Blog API (3000)</button>
+        <button class="test-btn" onclick="testZhuyeProxy()">测试Zhuye代理 (3001)</button>
+        <button class="test-btn" onclick="testFrontend()">测试前端加载</button>
+
+        <div id="testResults"></div>
+    </div>
+
+    <div class="card">
+        <h2>📊 当前配置</h2>
+        <pre>
+Blog服务端口: 3000
+Zhuye服务端口: 3000
+前端API地址: /api/articles (相对路径)
+认证方式: 无需Token（blog的 /api/articles 为公开接口）
+        </pre>
+    </div>
+
+    <div class="card">
+        <h2>🔍 常见问题</h2>
+        <ul>
+            <li><strong>Q: 显示"加载失败"</strong>
+                <br>A: 检查zhuye服务是否运行，环境变量是否正确配置</li>
+            <li><strong>Q: 空白区域，无内容</strong>
+                <br>A: 可能blog服务无文章，或CORS问题</li>
+            <li><strong>Q: 控制台报错404</strong>
+                <br>A: 确认访问的是 http://localhost:3000</li>
+            <li><strong>Q: 样式错乱</strong>
+                <br>A: 清除浏览器缓存，或按Ctrl+Shift+R强制刷新</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>🚀 快速修复</h2>
+        <ol>
+            <li>关闭所有浏览器窗口</li>
+            <li>清除浏览器缓存（或使用无痕模式）</li>
+            <li>重新打开 http://localhost:3001</li>
+            <li>按 Ctrl+F5 强制刷新</li>
+        </ol>
+    </div>
+
+    <script>
+        async function testAPI(url, headers = {}) {
+            try {
+                const response = await fetch(url, { headers });
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    data = text;
+                }
+                return { ok: response.ok, status: response.status, data };
+            } catch (error) {
+                return { ok: false, error: error.message };
+            }
+        }
+
+        function showResult(title, result) {
+            const div = document.createElement('div');
+            div.className = 'result ' + (result.ok ? 'success' : 'error');
+
+            let content = `【${title}】\n`;
+            if (result.ok) {
+                content += `✅ 状态: ${result.status}\n`;
+                content += `数据: ${typeof result.data === 'object' ? JSON.stringify(result.data, null, 2).substring(0, 500) : result.data}`;
+            } else {
+                content += `❌ 错误: ${result.error || result.message || '未知错误'}\n`;
+                if (result.data) content += `响应: ${typeof result.data === 'object' ? JSON.stringify(result.data) : result.data}`;
+            }
+
+            div.textContent = content;
+            document.getElementById('testResults').appendChild(div);
+        }
+
+        async function testBlogAPI() {
+            const result = await testAPI(
+                'http://localhost:3000/api/articles',
+                { 'Authorization': 'Bearer blog_mn7alwxy_mua3znpcofa' }
+            );
+            showResult('Blog API (3000)', result);
+        }
+
+        async function testZhuyeProxy() {
+            const result = await testAPI('http://localhost:3001/api/articles');
+            showResult('Zhuye代理 (3001)', result);
+        }
+
+        async function testFrontend() {
+            // 检查blog-box元素
+            const blogBox = document.querySelector('.blog-box');
+            const blogList = document.getElementById('blog-list');
+
+            const result = {
+                ok: true,
+                data: {
+                    blogBoxExists: !!blogBox,
+                    blogListExists: !!blogList,
+                    currentURL: window.location.href,
+                    port: window.location.port,
+                    apiURL: '/api/articles'
+                }
+            };
+
+            // 尝试直接调用
+            try {
+                const resp = await fetch('/api/articles');
+                result.data.apiResponse = await resp.json();
+                result.data.apiOk = resp.ok;
+            } catch (e) {
+                result.data.apiOk = false;
+                result.data.apiError = e.message;
+            }
+
+            showResult('前端检查', result);
+        }
+    </script>
+</body>
+</html>

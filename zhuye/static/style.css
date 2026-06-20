@@ -1,0 +1,1039 @@
+/* 全局样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+    height: 100vh;
+    overflow-y: auto;
+    background: #ffffff;
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    min-width: 0;
+}
+
+/* 侧边栏 - 使用更灵活的宽度 */
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    max-height: calc(100vh - 40px);
+    background: transparent;
+    border: 2px solid #667eea;
+    border-radius: 20px;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+/* 侧边栏滚动条样式 */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(123, 97, 255, 0.5);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(123, 97, 255, 0.7);
+}
+
+/* 时钟区域 */
+.clock-section {
+    text-align: center;
+    padding: 15px;
+    background: transparent;
+    border-radius: 10px;
+    color: #667eea;
+    box-shadow: none;
+    border: 2px solid #667eea;
+}
+
+.clock-time {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.clock-date {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.clock-holiday {
+    font-size: 0.8em;
+    color: #ffd700;
+    font-weight: bold;
+    min-height: 20px;
+}
+
+/* 天气模块 */
+.weather-section {
+    text-align: center;
+    padding: 15px;
+    background: transparent;
+    border-radius: 10px;
+    color: #667eea;
+    box-shadow: none;
+    border: 2px solid #667eea;
+}
+
+.weather-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.weather-title {
+    font-weight: bold;
+}
+
+.weather-location {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.weather-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.weather-icon {
+    font-size: 2.5em;
+    line-height: 1;
+}
+
+.weather-temp {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.weather-desc {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* 简略日历 */
+.calendar-section {
+    flex-shrink: 0;
+    padding: 15px;
+    background: transparent;
+    border-radius: 10px;
+    box-shadow: none;
+    border: 2px solid #667eea;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.calendar-header button {
+    background: transparent;
+    color: #667eea;
+    border: 1px solid #667eea;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    line-height: 1;
+    transition: all 0.3s;
+}
+
+.calendar-header button:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+#current-month {
+    font-weight: bold;
+    color: #333;
+    font-size: 1em;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 5px;
+}
+
+.calendar-weekdays div {
+    text-align: center;
+    font-size: 0.75em;
+    color: #666;
+    padding: 3px 0;
+    font-weight: bold;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #333;
+}
+
+.calendar-day:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.calendar-day.other-month {
+    color: #ccc;
+}
+
+.calendar-day.today {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+}
+
+/* 服务器状态区域 */
+.server-status-section {
+    padding: 15px;
+    background: transparent;
+    border-radius: 10px;
+    box-shadow: none;
+    border: 2px solid #667eea;
+}
+
+.server-status-section h3 {
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1em;
+}
+
+.server-item {
+    background: transparent;
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    border: 2px solid #667eea;
+}
+
+.server-name {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.server-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-online {
+    background: #2ed573;
+    animation: pulse 2s infinite;
+}
+
+.status-offline {
+    background: #ff4757;
+}
+
+.status-checking {
+    background: #ffa502;
+    animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.server-info {
+    font-size: 0.75em;
+    color: #666;
+}
+
+.server-latency {
+    font-size: 0.75em;
+    color: #667eea;
+}
+
+.server-load {
+    font-size: 0.75em;
+    color: #ff6b81;
+}
+
+/* 主内容区域 */
+.main-content {
+    flex: 1;
+    min-width: 0;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-y: auto;
+    background: transparent;
+    border: 2px solid #667eea;
+    border-bottom: 2px solid #667eea; /* 保留下边框，形成完整的圆角矩形 */
+    border-radius: 20px; /* 所有角都圆角 */
+    min-height: 500px;
+}
+
+/* 博客文章列表区域 */
+.blog-box {
+    width: 100%;
+    background: transparent;
+    border-radius: 20px;
+    padding: 15px 20px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 2px solid #667eea;
+    box-sizing: border-box;
+}
+
+.blog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.blog-header h2 {
+    color: #333;
+    font-size: 1.4em;
+    margin: 0;
+}
+
+.blog-more {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: all 0.3s;
+    padding: 5px 12px;
+    border: 1px solid #667eea;
+    border-radius: 15px;
+}
+
+.blog-more:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(3px);
+}
+
+.blog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.blog-item {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.3s;
+}
+
+.blog-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.blog-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    gap: 10px;
+}
+
+.blog-item-title {
+    color: #333;
+    font-size: 1em;
+    margin: 0;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.blog-item-date {
+    color: #999;
+    font-size: 0.75em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.blog-item-excerpt {
+    color: #666;
+    font-size: 0.85em;
+    line-height: 1.5;
+    margin: 0 0 6px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.blog-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    border-top: 1px solid rgba(102, 126, 234, 0.15);
+}
+
+.blog-item-category {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+}
+
+.blog-item-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.8em;
+    font-weight: 500;
+    transition: all 0.3s;
+    padding: 3px 8px;
+    border-radius: 8px;
+}
+
+.blog-item-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+/* 语录模块 */
+.quote-box {
+    width: 100%;
+    background: transparent;
+    border-radius: 20px;
+    padding: 20px 25px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 2px solid #667eea;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.quote-content {
+    flex: 1;
+    min-width: 0; /* 防止文本溢出 */
+}
+
+.quote-text {
+    color: #333;
+    font-size: 1em;
+    line-height: 1.8;
+    margin: 0 0 8px 0;
+    font-style: italic;
+    text-align: justify;
+}
+
+.quote-author {
+    color: #667eea;
+    font-size: 0.85em;
+    margin: 0;
+    text-align: right;
+}
+
+.quote-author::before {
+    content: "—— ";
+}
+
+.quote-refresh {
+    flex-shrink: 0;
+    background: transparent;
+    color: #667eea;
+    border: 1px solid #667eea;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    line-height: 1;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.quote-refresh:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: rotate(180deg);
+}
+
+.quote-loading,
+.quote-error {
+    text-align: center;
+    padding: 30px 20px;
+    color: #999;
+    font-size: 0.9em;
+}
+
+.quote-error {
+    color: #ff4757;
+}
+
+.blog-loading,
+.blog-empty,
+.blog-error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 0.95em;
+}
+
+.blog-error {
+    color: #ff4757;
+}
+
+.blog-backup-link {
+    display: block;
+    text-align: center;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border: 1px dashed #667eea;
+    border-radius: 10px;
+    margin-top: 15px;
+    color: #667eea;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.blog-backup-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-style: solid;
+}
+
+.footer {
+    width: 100%;
+    height: 40px; /* 固定高度 */
+    padding: 0; /* 取消内边距 */
+    margin-top: auto;
+    text-align: center;
+    border: none; /* 移除footer的边框，由footer-content负责 */
+    border-radius: 0; /* 移除圆角，由footer-content负责 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-content {
+    width: 100%; /* 与 blog-box 相同，占满父容器 */
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #667eea; /* 独立边框 */
+    border-radius: 20px; /* 所有角都圆角 */
+    box-sizing: border-box; /* 确保边框计入高度 */
+}
+
+.footer-text {
+    color: #666;
+    font-size: 0.9em;
+    line-height: 1.2; /* 减小行高 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0 10px; /* 减小间距 */
+}
+
+.footer-link {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px; /* 从6px减小到4px */
+    padding: 2px 0; /* 从4px 0减小到2px 0 */
+}
+
+.footer-link:hover {
+    color: #667eea;
+}
+
+.footer-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
+/* 响应式设计 - 页脚 */
+@media (max-width: 768px) {
+    .footer {
+        padding: 10px 15px; /* 恢复合理的移动端内边距 */
+    }
+
+    .footer-text {
+        font-size: 0.85em; /* 从 0.75em 恢复 */
+        line-height: 1.8; /* 从 1.2 恢复 */
+        gap: 0 10px; /* 从 8px 恢复 */
+    }
+
+    .footer-icon {
+        width: 14px; /* 从 12px 恢复 */
+        height: 14px;
+    }
+
+    .footer-link {
+        gap: 4px; /* 从 3px 恢复 */
+    }
+}
+
+/* 超小屏幕优化 (小屏手机) */
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    .sidebar {
+        padding: 12px 10px;
+        gap: 12px;
+    }
+
+    .main-content {
+        padding: 12px;
+    }
+
+    .profile-box {
+        padding: 15px;
+    }
+
+    .profile-content {
+        gap: 15px;
+    }
+
+    .profile-avatar img {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+    }
+
+    .profile-info h2 {
+        font-size: 1.2em;
+        margin-bottom: 6px;
+    }
+
+    .profile-title {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+
+    .profile-description {
+        font-size: 0.85em;
+        margin-bottom: 12px;
+    }
+
+    .profile-links {
+        gap: 8px;
+    }
+
+    .social-link {
+        padding: 5px 10px;
+        font-size: 0.75em;
+    }
+
+    .clock-time {
+        font-size: 1.3em;
+    }
+
+    .clock-date {
+        font-size: 0.75em;
+    }
+
+    .clock-holiday {
+        font-size: 0.65em;
+    }
+
+    .blog-box {
+        padding: 10px 12px;
+    }
+
+    .blog-header h2 {
+        font-size: 1.1em;
+    }
+
+    .quote-box {
+        padding: 10px 12px;
+    }
+
+    .quote-text {
+        font-size: 0.85em;
+        line-height: 1.5;
+    }
+
+    .quote-author {
+        font-size: 0.75em;
+    }
+
+    .quote-refresh {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9em;
+    }
+}
+
+/* 平板设备优化 - 横屏模式 */
+@media (max-width: 1024px) and (min-width: 769px) {
+    body {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 240px;
+        max-height: calc(100vh - 40px);
+        padding: 15px 12px;
+        gap: 15px;
+        overflow-y: auto;
+    }
+
+    .main-content {
+        min-width: 0;
+        padding: 15px 20px;
+    }
+
+    /* 调整字体大小 */
+    .clock-time {
+        font-size: 1.8em;
+    }
+
+    .weather-icon {
+        font-size: 2em;
+    }
+
+    .weather-temp {
+        font-size: 1.8em;
+    }
+
+    .profile-avatar img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-info h2 {
+        font-size: 1.6em;
+    }
+}
+
+/* 小屏笔记本/平板竖屏优化 */
+@media (max-width: 900px) {
+    .sidebar {
+        width: 260px;
+        max-height: calc(100vh - 40px);
+    }
+}
+
+/* 个人简介卡片 */
+.profile-box {
+    background: transparent;
+    border-radius: 20px;
+    padding: 30px;
+    width: 100%;
+    margin-top: 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-content {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.profile-avatar {
+    flex-shrink: 0;
+}
+
+.profile-avatar img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h2 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.8em;
+}
+
+.profile-title {
+    color: #667eea;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.profile-description {
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    font-size: 1em;
+}
+
+.profile-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.skill-tag {
+    background: transparent;
+    color: #667eea;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    transition: all 0.3s;
+}
+
+.skill-tag:hover {
+    background: transparent;
+    color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+.profile-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-link {
+    color: #667eea;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid #667eea;
+    border-radius: 25px;
+    transition: all 0.3s;
+    font-size: 0.9em;
+}
+
+.social-link:hover {
+    background: transparent;
+    color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        height: auto; /* 改为自动高度 */
+        min-height: 100vh; /* 保证至少占满视口 */
+        padding: 10px; /* 减小移动端内边距 */
+    }
+
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-height: none;
+        height: auto;
+        padding: 10px 8px;
+        gap: 10px;
+        border: 2px solid #667eea;
+        border-radius: 20px;
+        flex-shrink: 0; /* 防止侧边栏被压缩 */
+        overflow-y: visible; /* 移动端通常内容较少，不需要滚动 */
+    }
+
+    .main-content {
+        flex: 1; /* 自动扩展填充剩余空间 */
+        width: 100%;
+        min-height: 500px; /* 最小高度保证可读性 */
+        padding: 15px;
+        border: 2px solid #667eea;
+        border-radius: 20px;
+        overflow-y: visible; /* 改为可见，避免不必要的滚动条 */
+    }
+
+    .profile-box {
+        padding: 20px;
+    }
+
+    .profile-content {
+        gap: 20px;
+    }
+
+    .profile-avatar img {
+        width: 100px;
+        height: 100px;
+        border-width: 3px;
+    }
+
+    .profile-info h2 {
+        font-size: 1.4em;
+        margin-bottom: 8px;
+    }
+
+    .profile-title {
+        font-size: 1em;
+        margin-bottom: 12px;
+    }
+
+    .profile-description {
+        font-size: 0.9em;
+        margin-bottom: 15px;
+    }
+
+    .profile-skills {
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .skill-tag {
+        padding: 5px 10px;
+        font-size: 0.8em;
+    }
+
+    .profile-links {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .social-link {
+        padding: 6px 12px;
+        font-size: 0.8em;
+    }
+
+    .clock-time {
+        font-size: 1.5em;
+    }
+
+    .clock-date {
+        font-size: 0.8em;
+    }
+
+    .clock-holiday {
+        font-size: 0.7em;
+    }
+
+    .clock-section {
+        padding: 10px;
+    }
+
+    .calendar-section,
+    .server-status-section,
+    .blog-box {
+        padding: 10px;
+    }
+
+    .blog-header h2 {
+        font-size: 1.2em;
+    }
+
+    .blog-item {
+        padding: 15px;
+    }
+
+    .blog-item-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .blog-item-date {
+        font-size: 0.75em;
+    }
+
+    .quote-box {
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
+    .quote-text {
+        font-size: 0.9em;
+        line-height: 1.6;
+    }
+
+    .quote-author {
+        font-size: 0.8em;
+    }
+
+    .quote-refresh {
+        width: 32px;
+        height: 32px;
+        font-size: 1em;
+    }
+
+    .footer {
+        height: auto; /* 移动端改为自动高度 */
+        padding: 8px 12px; /* 添加内边距 */
+    }
+
+    .footer-content {
+        width: 100%; /* 移动端占满父元素宽度 */
+        height: auto; /* 移动端改为自动高度 */
+        padding: 10px; /* 与 blog-box 保持相同的内边距 */
+        box-sizing: border-box; /* 确保边框计入宽度 */
+    }
+}

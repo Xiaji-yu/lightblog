@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>链接更新验证</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #667eea; }
+        h2 { color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .link-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        .link-item strong {
+            color: #667eea;
+            display: inline-block;
+            width: 120px;
+        }
+        .link-item a {
+            color: #10B981;
+            text-decoration: none;
+        }
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        .test-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover { background: #5568d3; }
+        #testResults { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🔗 Zhuye 链接更新验证</h1>
+
+    <div class="card">
+        <h2>📋 更新的链接</h2>
+
+        <div class="link-item">
+            <strong>GitHub:</strong>
+            <a href="https://github.com/Xiaji-yu" target="_blank">https://github.com/Xiaji-yu</a>
+            <span class="status status-success">已更新</span>
+        </div>
+
+        <div class="link-item">
+            <strong>博客:</strong>
+            <a href="https://blog.xiaji.xin" target="_blank">https://blog.xiaji.xin</a>
+            <span class="status status-success">已更新</span>
+        </div>
+
+        <div class="link-item">
+            <strong>邮箱:</strong>
+            <a href="mailto:variant305@gmail.com">variant305@gmail.com</a>
+            <span class="status status-success">已更新</span>
+        </div>
+
+        <div class="link-item">
+            <strong>查看更多:</strong>
+            <a href="https://blog.xiaji.xin" target="_blank">https://blog.xiaji.xin</a>
+            <span class="status status-success">已更新</span>
+        </div>
+
+        <div class="link-item">
+            <strong>阅读全文:</strong>
+            <a href="https://blog.xiaji.xin/article.html?id=test" target="_blank">https://blog.xiaji.xin/article.html?id={id}</a>
+            <span class="status status-success">已更新</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🧪 快速测试</h2>
+        <button class="test-btn" onclick="testLinks()">测试所有链接</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="card">
+        <h2>📝 修改说明</h2>
+        <ul>
+            <li>GitHub链接从 <code>#</code> 改为 <code>https://github.com/Xiaji-yu</code></li>
+            <li>博客链接从 <code>#</code> 改为 <code>https://blog.xiaji.xin</code></li>
+            <li>邮箱链接从 <code>#</code> 改为 <code>mailto:variant305@gmail.com</code></li>
+            <li>所有localhost:3000引用改为blog.xiaji.xin</li>
+            <li>所有外部链接使用 <code>target="_blank"</code> 新窗口打开</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>✅ 验证清单</h2>
+        <ul>
+            <li>✅ index.html: profile-links (GitHub, 博客, 邮箱)</li>
+            <li>✅ index.html: blog-box "查看更多" 按钮</li>
+            <li>✅ script.js: blog-item "阅读全文" 链接</li>
+            <li>✅ script.js: 错误状态备用链接</li>
+            <li>✅ 所有链接使用正确的域名</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>🚀 立即体验</h2>
+        <p><a href="/" target="_blank">访问 Zhuye 主页 →</a></p>
+        <p>刷新页面（Ctrl+F5），检查所有链接是否正确。</p>
+    </div>
+
+    <script>
+        async function testLinks() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<p>测试中...</p>';
+
+            const links = [
+                { name: 'GitHub', url: 'https://github.com/Xiaji-yu' },
+                { name: '博客', url: 'https://blog.xiaji.xin' },
+                { name: '邮箱', url: 'mailto:variant305@gmail.com' }
+            ];
+
+            let html = '<div class="result">';
+            for (const link of links) {
+                try {
+                    const res = await fetch(link.url, { method: 'HEAD', mode: 'no-cors' });
+                    html += `<p>✅ ${link.name}: ${link.url} - 可达</p>`;
+                } catch (e) {
+                    html += `<p>⚠️ ${link.name}: ${link.url} - 检查失败（可能被浏览器阻止）</p>`;
+                }
+            }
+            html += '</div>';
+            results.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
