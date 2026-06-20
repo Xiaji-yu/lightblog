@@ -80,9 +80,8 @@ sudo ufw enable
 ```bash
 sudo mkdir -p /var/www
 cd /var/www
-sudo git clone https://github.com/Xiaji-yu/lightblog.git blog
-sudo chown -R $USER:$USER /var/www/blog
-cd blog
+sudo git clone https://github.com/Xiaji-yu/lightblog.git .
+sudo chown -R $USER:$USER /var/www
 ```
 
 ---
@@ -92,7 +91,7 @@ cd blog
 ### 3.1 安装依赖
 
 ```bash
-cd /var/www/blog/blog/api
+cd /var/www/blog/api
 npm install
 ```
 
@@ -264,7 +263,7 @@ location /home/ {
 server {
     listen 80;
     server_name your-domain.com;
-    root /var/www/blog/zhuye/static;
+    root /var/www/zhuye/static;
     index index.html;
 
     access_log /var/log/nginx/blog-access.log;
@@ -477,7 +476,7 @@ sudo tail -f /var/log/nginx/error.log  # Nginx 错误日志
 
 ```bash
 # 在服务器上直接创建文章（示例）
-cd /var/www/blog/blog/api/app-data/md
+cd /var/www/blog/api/app-data/md
 
 # 写入 Markdown 文件
 cat > my-new-post.md << 'EOF'
@@ -505,19 +504,19 @@ sudo systemctl restart blog
 ```bash
 # 备份文章和用户数据
 sudo tar -czf /root/backup-$(date +%Y%m%d).tar.gz \
-  /var/www/blog/blog/api/app-data/
+  /var/www/blog/api/app-data/
 
 # 定期自动备份（添加 crontab）
 sudo crontab -e
 
 # 每天凌晨 3 点自动备份
-0 3 * * * tar -czf /root/backup-$(date +\%Y\%m\%d).tar.gz /var/www/blog/blog/api/app-data/ && find /root/backup-*.tar.gz -mtime +7 -delete
+0 3 * * * tar -czf /root/backup-$(date +\%Y\%m\%d).tar.gz /var/www/blog/api/app-data/ && find /root/backup-*.tar.gz -mtime +7 -delete
 ```
 
 ### 6.4 更新代码
 
 ```bash
-cd /var/www/blog
+cd /var/www
 sudo git pull origin master
 cd blog/api
 npm install --production
@@ -536,7 +535,7 @@ sudo systemctl restart zhuye
 
 ```bash
 # 清理 7 天前的应用日志
-cd /var/www/blog
+cd /var/www
 bash cleanup-logs.sh
 
 # 清理 Nginx 旧日志
@@ -632,8 +631,8 @@ sudo journalctl -u zhuye -n 50 --no-pager
 
 常见原因：
 - 端口被占用 → `sudo ss -tlnp | grep 3000`
-- 权限不足 → `sudo chown -R www-data:www-data /var/www/blog/blog/api/app-data`
-- `.env` 文件不存在或格式错误 → `cat /var/www/blog/blog/api/.env`
+- 权限不足 → `sudo chown -R www-data:www-data /var/www/blog/api/app-data`
+- `.env` 文件不存在或格式错误 → `cat /var/www/blog/api/.env`
 
 ### 问题：SSH 服务器检测显示"检测失败"
 

@@ -24,8 +24,8 @@ sudo apt install -y nodejs
 ```bash
 sudo mkdir -p /var/www
 cd /var/www
-sudo git clone https://github.com/Xiaji-yu/lightblog.git blog
-sudo chown -R $USER:$USER /var/www/blog
+sudo git clone https://github.com/Xiaji-yu/lightblog.git .
+sudo chown -R $USER:$USER /var/www
 cd blog
 ```
 
@@ -69,7 +69,7 @@ server_name 192.168.1.100;  # 改为你的服务器内网 IP
 server {
     listen 80;
     server_name 192.168.1.100;  # 你的内网 IP
-    root /var/www/blog/zhuye/static;  # 指向 zhuye 静态文件
+    root /var/www/zhuye/static;  # 指向 zhuye 静态文件
     index index.html;
 
     access_log /var/log/nginx/blog-access.log;
@@ -192,7 +192,7 @@ sudo systemctl status zhuye
 
 ```bash
 # 终端 1：启动 blog（端口 3000）
-cd /var/www/blog/blog/api
+cd /var/www/blog/api
 node server.js
 
 # 终端 2：启动 zhuye（端口 3001，通过环境变量区分）
