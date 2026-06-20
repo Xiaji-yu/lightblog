@@ -47,7 +47,7 @@
 5. **zhuye/.env** (实际配置)
    - PORT=3001 (从3000修改)
    - BLOG_SERVICE_URL=http://localhost:3000
-   - BLOG_API_TOKEN=blog_mn7alwxy_mua3znpcofa
+   - BLOG_API_TOKEN=YOUR_BLOG_API_TOKEN
 
 6. **zhuye/api/.env.example** (示例文件)
    - 同步更新为3001端口和新增blog配置
@@ -95,7 +95,7 @@
 ```bash
 PORT=3001
 BLOG_SERVICE_URL=http://localhost:3000
-BLOG_API_TOKEN=blog_mn7alwxy_mua3znpcofa
+BLOG_API_TOKEN=YOUR_BLOG_API_TOKEN
 ```
 
 ### 2. 重启zhuye服务
@@ -151,7 +151,7 @@ curl http://localhost:3001/api/articles
 **检查**:
 ```bash
 # 1. blog服务是否运行
-curl http://localhost:3000/api/articles -H "Authorization: Bearer blog_mn7alwxy_mua3znpcofa"
+curl http://localhost:3000/api/articles -H "Authorization: Bearer YOUR_BLOG_API_TOKEN"
 
 # 2. zhuye代理是否正常
 curl http://localhost:3001/api/articles

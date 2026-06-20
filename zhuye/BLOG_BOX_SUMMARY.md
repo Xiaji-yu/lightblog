@@ -91,7 +91,7 @@ setInterval(loadBlogPosts, 300000);
 | zhuye代理路由 | `/api/articles` |
 | blog服务地址 | `http://localhost:3000` (默认) |
 | Token配置 | `BLOG_API_TOKEN` 环境变量 |
-| 默认Token | blog_mn7alwxy_mua3znpcofa |
+| 默认Token | YOUR_BLOG_API_TOKEN |
 | 刷新间隔 | 5分钟 |
 | 显示数量 | 5篇 |
 
@@ -115,7 +115,7 @@ setInterval(loadBlogPosts, 300000);
 ### 前置条件
 1. **blog服务**必须运行在 `http://localhost:3000` (或配置的地址)
 2. **zhuye服务**必须运行在 `http://localhost:3001`
-3. Token `blog_mn7alwxy_mua3znpcofa` 必须在blog的users.json中配置
+3. Token `YOUR_BLOG_API_TOKEN` 必须在blog的users.json中配置
 
 ### 启动步骤
 
@@ -181,7 +181,7 @@ setInterval(loadBlogPosts, 300000);
 **测试blog API** (端口3000):
 ```bash
 curl -s http://localhost:3000/api/articles \
-  -H "Authorization: Bearer blog_mn7alwxy_mua3znpcofa" \
+  -H "Authorization: Bearer YOUR_BLOG_API_TOKEN" \
   | head -20
 ```
 预期返回JSON数组
@@ -235,14 +235,14 @@ test-blog-api.bat
 2. **Token配置**:
    - Token已移至后端（zhuye server.js），前端无需暴露
    - 可通过环境变量 `BLOG_API_TOKEN` 修改
-   - 默认Token: `blog_mn7alwxy_mua3znpcofa`
+   - 默认Token: `YOUR_BLOG_API_TOKEN`
 
 3. **环境变量支持** (可选):
    ```bash
    # zhuye/.env 文件可添加：
    PORT=3001
    BLOG_SERVICE_URL=http://localhost:3000
-   BLOG_API_TOKEN=blog_mn7alwxy_mua3znpcofa
+   BLOG_API_TOKEN=YOUR_BLOG_API_TOKEN
    ```
 
 4. **性能优化**:

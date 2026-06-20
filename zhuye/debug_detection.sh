@@ -29,7 +29,7 @@ if [ -f "api/.env" ]; then
             echo "   ❌ $line (密码为空或未设置)"
         else
             value=$(echo "$line" | cut -d'=' -f2)
-            if [ "$value" = "Yll@2468" ] || [ "$value" = "0621" ]; then
+            if [ "$value" = "<SECRET_33167e60>" ] || [ "$value" = "<SECRET_7a4a56f8>" ]; then
                 echo "   ⚠️  $line (使用默认密码，可能不安全)"
             else
                 echo "   ✅ $line (已配置)"

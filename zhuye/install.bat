@@ -38,10 +38,10 @@ if not exist .env (
     echo ✅ 已创建 .env 文件
     echo.
     echo 📝 请编辑 .env 文件，填入服务器密码：
-    echo    ROUTER_PASSWORD=0621
-    echo    NAS_PASSWORD=Yll@2468
-    echo    CLOUD_PASSWORD=Yll@2468
-    echo    OPENCLAW_PASSWORD=Yll@2468
+    echo    ROUTER_PASSWORD=<SECRET_7a4a56f8>
+    echo    NAS_PASSWORD=<SECRET_33167e60>
+    echo    CLOUD_PASSWORD=<SECRET_33167e60>
+    echo    OPENCLAW_PASSWORD=<SECRET_33167e60>
     echo.
 ) else (
     echo ✅ 找到 .env 文件

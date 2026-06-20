@@ -36,7 +36,7 @@ zhuye返回: 同JSON数据给前端
 ### 测试1: Blog服务API直接访问
 ```bash
 curl -s http://localhost:3000/api/articles \
-  -H "Authorization: Bearer blog_mn7alwxy_mua3znpcofa"
+  -H "Authorization: Bearer YOUR_BLOG_API_TOKEN"
 ```
 
 **结果**: ✅ 成功返回文章列表
